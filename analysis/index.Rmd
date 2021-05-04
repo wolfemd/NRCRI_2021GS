@@ -1,5 +1,5 @@
 ---
-title: "Home"
+title: "NRCRI 2021 GS and related procedures"
 site: workflowr::wflow_site
 output:
   workflowr::wflow_html:
@@ -9,3 +9,82 @@ editor_options:
 ---
 
 Welcome to my research website.
+
+
+This repository and website documents all analyses, summary, tables and figures associated with NRCRI genomic prediction and related procedures (e.g. imputation).
+
+# April 2021 (DCas21_5841 - NRCRI C3b)
+
+I think this report corresponds to the GS C3b. Last NRCRI imputation and prediction was [October 2020](https://wolfemd.github.io/NRCRI_2020GS/index.html#october-imputations) corresponding to a C3a, I assume.
+
+## Imputation of genotyping project 
+
+Impute with E. Africa Imputation Reference Panel dataset, which can be found on the [Cassavabase FTP server here](ftp://ftp.cassavabase.org/marnin_datasets/nextgenImputation2019/ImputationEastAfrica_StageII_90919/) with names e.g. `chr*_ImputationReferencePanel_StageVI_91119.vcf.gz` with [code/documentation here](https://wolfemd.github.io/NaCRRI_2020GS/).
+
+**Steps**:
+
+1.   [Convert DCas21-5841 report to VCF for imputation](convertDCas21_5841_ToVCF.html):
+2.   [Impute DCas21-5841](ImputeDCas21_5841.html): with West Africa reference panel
+
+**Files**:
+
+-   **RefPanel VCF filename:** `chr*_ImputationReferencePanel_StageIIpartI_72219.vcf.gz`
+-   **Imputed filename:** `chr*_DCas21_5841_WA_REFimputed.vcf.gz`
+-   **Post-impute filtered filename:** `chr*_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz`
+-   **Genome-wide dosage matrix format for use in R:** `DosageMatrix_DCas21_5841_WA_REFimputedAndFiltered.rds`
+
+**HOW TO COMBINE DOSAGE MATRICES:** Users will want to combine the genotypes in the imputation reference panel files, with the genotypes in the imputed DArT file. They can have slightly different sets of markers along the columns. Here is a basic example how to combine:
+
+```{r, eval=F}
+snps_refpanel<-readRDS("DosageMatrix_RefPanelAndGSprogeny_ReadyForGP_73019.rds")
+snps_dcas21_5841<-readRDS("DosageMatrix_DCas21_5841_WA_REFimputedAndFiltered.rds")
+
+snps2keep<-colnames(snps_refpanel)[,colnames(snps_refpanel) %in% colnames(snps_dcas20_5629)]
+snps<-bind_rows(snps_refpanel[,snps2keep],
+                snps_dcas21_5841[,snps2keep])
+```
+
+## Genomic Prediction
+
+Get NRCRI TP data from Cassavabase. Use it with imputed data to predict GEBV/GETGV for all samples in the new reports (**DCas21-5841**). 
+
+1. [Prepare training dataset](01-cleanTPdata.html): Download data from DB, "Clean" and format DB data.
+2. [Get BLUPs combining all trial data](02-GetBLUPs.html): Combine data from all trait-trials to get BLUPs for downstream genomic prediction. 
+    * Fit mixed-model to multi-trial dataset and extract BLUPs, de-regressed BLUPs and weights. Include two rounds of outlier removal.
+3. [Check prediction accuracy](03-CrossValidation.html): Evaluate prediction accuracy with cross-validation.
+    * Compare prediction accuracy with vs. without IITA's training data to augment.
+4. [Genomic prediction](04-GetGBLUPs.html): Predict _genomic_ BLUPs (GEBV and GETGV) for all selection candidates using all available data.
+5. [Results](05-Results.html): Plots, results and recommendations.
+
+**OUTPUT / FILES**: everything is in the `output/` sub-directory. 
+
+-  **GEBVs for parent selection:** `GEBV_NRCRI_ModelA_2021April29.csv`
+-  **GETGVs for variety advancement:** `GETGV_NRCRI_ModelADE_2021April29.csv`
+-  **Tidy, long-form CSV of predictions, including PEVs:** `genomicPredictions_NRCRI_2021April29.csv`
+
+[**DOWNLOAD FROM CASSAVABASE FTP SERVER**](ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/output/)
+
+or  
+
+[**DOWNLOAD FROM GitHub**](https://github.com/wolfemd/NRCRI_2021GS/tree/master/output)
+
+# Data availability and reproducibility
+
+The R package **workflowr** was used to document this study reproducibly.
+
+Much of the supporting data *and* output from the analyses documented here are too large for GitHub.
+
+The repository will be mirrored, here: <ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/> with all data.
+
+# Directory structure of this repository
+
+**NOTICE:** `data/` and `output/` are empty on GitHub. Please see <ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/> for access.
+
+1.  `data/`: raw data (e.g. unimputed SNP data)
+2.  `output/`: outputs (e.g. imputed SNP data)
+3.  `analysis/`: most code and workflow documented in **.Rmd** files
+4.  `docs/`: compiled **.html**, "knitted" from **.Rmd**
+
+Supporting functions `code/`
+
+The analyses in the **html** / **Rmd** files referenced above often source R scripts in the `code/` sub-folder. 

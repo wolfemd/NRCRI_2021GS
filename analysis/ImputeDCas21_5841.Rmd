@@ -1,0 +1,145 @@
+---
+title: "Impute NRCRI DCas21_5841"
+site: workflowr::wflow_site
+date: "2021-April-29"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+DArTseqLD (DCas21-5841). 
+
+# Copy data
+
+Copy the imputation reference panel from 2019 to the `data/` folder. 
+
+```{bash,eval = FALSE}
+mkdir /workdir/mw489/
+cp -r /home/jj332_cas/marnin/NRCRI_2021GS /workdir/mw489/
+cp -r /home/jj332_cas/CassavaGenotypeData/CassavaGeneticMap /workdir/mw489/NRCRI_2021GS/data/
+cp /home/jj332_cas/CassavaGenotypeData/nextgenImputation2019/ImputationStageII_71219/chr*_ImputationReferencePanel_StageIIpartI_72219.vcf.gz /workdir/mw489/NRCRI_2021GS/data/
+```
+
+# Impute with West Africa RefPanel
+
+Impute with [Beagle V5.0](https://faculty.washington.edu/browning/beagle/b5_0.html).
+
+Use the "imputation reference panel" dataset from 2019, e.g. `chr1_ImputationReferencePanel_StageIIpartI_72219.vcf.gz` as reference.
+
+Used 1 large memory Cornell CBSU machine (e.g. [cbsulm17; 112 cores, 512 GB RAM](https://biohpc.cornell.edu/lab/hardware.aspx)), running 1 chromosome at a time.
+
+R functions are stored in the `code/` sub-directory. Functions sourced from e.g. **imputationFunctions.R** are wrappers around e.g. Beagle, and other command line programs.
+```{bash, eval=F}
+cd /workdir/mw489/NRCRI_2021GS/
+```
+
+```{r,eval = FALSE}
+targetVCFpath<-here::here("data/Report-DCas21-5841/") # location of the targetVCF
+refVCFpath<-here::here("data/")
+mapPath<-here::here("data/CassavaGeneticMap/")
+outPath<-here::here("output/")
+outSuffix<-"DCas21_5841"
+```
+
+```{r,eval = FALSE}
+source(here::here("code","imputationFunctions.R"))
+purrr::map(1:18,~runBeagle5(targetVCF=paste0(targetVCFpath,"chr",.,
+                                             "_DCas21_5841.vcf.gz"),
+                            refVCF=paste0(refVCFpath,"chr",.,"_ImputationReferencePanel_StageIIpartI_72219.vcf.gz"),
+                            mapFile=paste0(mapPath,"chr",.,"_cassava_cM_pred.v6_91019.map"),
+                            outName=paste0(outPath,"chr",.,"_DCas21_5841_WA_REFimputed"),
+                            nthreads=112))
+```
+
+Clean up Beagle log files after run. Move to sub-directory `output/BeagleLogs/`.
+```{bash,eval = FALSE}
+cd /workdir/mw489/NRCRI_2021GS/output/; 
+mkdir BeagleLogs;
+cp *_DCas21_5841_WA_REFimputed.log BeagleLogs/
+cp -r BeagleLogs /home/jj332_cas/marnin/NRCRI_2021GS/output/
+cp *_DCas21_5841_WA_REFimputed* /home/jj332_cas/marnin/NRCRI_2021GS/output/
+```
+
+# Post-impute filter
+
+For now, the function will just do a fixed filter: AR2>0.75 (DR2>0.75 as of Beagle5.0), P_HWE>1e-20, MAF>0.005 [0.5%]. 
+
+It can easily be modified in the future to include parameters to vary the filter specifications.
+
+Input parameters
+```{r,eval = FALSE}
+#' @inPath path to input VCF-to-be-filtered, can be left null if path included in @inName . Must end in "/"
+#' @inName name of input VCF file EXCLUDING file extension. Assumes .vcf.gz
+#' @outPath path where filtered VCF and related are to be stored.Can be left null if path included in @outName . Must end in "/".
+#' @outName name desired for output EXCLUDING extension. Output will be .vcf.gz 
+```
+
+Loop to filter all 18 VCF files in parallel
+```{r,eval = FALSE}
+inPath<-here::here("output/")
+outPath<-here::here("output/")
+source(here::here("code","imputationFunctions.R"))
+require(furrr); options(mc.cores=18); plan(multiprocess)
+future_map(1:18,~postImputeFilter(inPath=inPath,
+                                  inName=paste0("chr",.,"_DCas21_5841_WA_REFimputed"),
+                                  outPath=outPath,
+                                  outName=paste0("chr",.,"_DCas21_5841_WA_REFimputedAndFiltered")))
+```
+
+Check what's left
+```{r,eval = FALSE}
+purrr::map(1:18,~system(paste0("zcat ",here::here("output/"),"chr",.,"_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz | wc -l")))
+# 7366
+# 3439
+# 3129
+# 2581
+# 3119
+# 2962
+# 1574
+# 2809
+# 2854
+# 2334
+# 2728
+# 2434
+# 2178
+# 4912
+# 3356
+# 2272
+# 2142
+# 2651
+```
+
+```{bash, eval=F}
+cd /workdir/mw489/NRCRI_2021GS/output/;
+cp -r *_DCas21_5841_WA_REFimputed* /home/jj332_cas/marnin/NRCRI_2021GS/output/
+```
+
+# Formats for downstream analysis
+
+The function below will (1) convert the input VCF to plink1.9 binary format and (2) convert the plink binary to a dosage (0,1,2) matrix with special attention to which allele gets counted in the file.
+
+**NOTICE:** I was worried about `plink1.9` changing allele codes between files. There is some risk the counted allele could switch between e.g. the reference panel and the progeny files because of allele freq. (see plink documentation). To avoid this, went to extra trouble: write a file suffixed `*.alleleToCount` listing SNP ID (column 1) and the ALT allele from the VCF (column 2). Pass the file to `plink1.9` using the `--recode-allele` flag to ensure all output dosages count the ALT allele consistent with the VCFs. The reason to use `plink1.9` is that `Beagle5` imputed files don't have a **DS** (dosage) field that can be directly extracted. Instead, phased genotypes e.g. `0|1` need to be converted to dosages (e.g. `0|1 --> 1`, `1|1 --> 2`). An alternative might be to extract the haplotypes using `vcftools` and manually (in R) computed the dosages; that would give most control but is slow.
+
+```{bash, eval=F}
+cd /home/jj332_cas/marnin/NRCRI_2021GS/;
+```
+```{r, eval=F}
+library(tidyverse); library(magrittr);
+source(here::here("code","imputationFunctions.R"))
+require(furrr); options(mc.cores=18); plan(multiprocess)
+pathOut<-here::here("output/")
+
+# DCas21_5841
+future_map(1:18,~convertVCFtoDosage(pathIn=here::here("output/"),pathOut=pathOut,
+                                    vcfName = paste0("chr",.,"_DCas21_5841_WA_REFimputedAndFiltered")))
+# Genome-wide dosage (for use in R) for each dataset
+# DCas21_5841
+createGenomewideDosage(pathIn = here::here("output/"), chroms=1:18, "_DCas21_5841_WA_REFimputedAndFiltered")
+
+```
+
+

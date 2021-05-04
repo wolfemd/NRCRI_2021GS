@@ -1,0 +1,179 @@
+---
+title: "Convert NRCRI DCas21-5841 to VCF"
+site: workflowr::wflow_site
+date: "2021-April-29"
+output: 
+  workflowr::wflow_html:
+    toc: true
+editor_options:
+  chunk_output_type: inline
+---
+
+```{bash, eval=F}
+cd /home/jj332_cas/marnin/NRCRI_2021GS;
+# Initiate "screen" and then R
+```
+
+# Input Parameters
+```{r, eval=F}
+#' @dartvcfInput input name and path of "vcf" file from DArT
+#' @dartcountsInput input name and path of counts file from DArT
+#' @outName output path and name
+#' @nskipvcf number of "VCF" rows to skip on read-in
+#' @nskipcounts number of "counts file" rows to skip on read in
+#' @ncores number of cores to use, could be VERY memory intensive
+#' @dartVars chr vector, column names that _are not_ sample IDs in the read-counts file. I use this internally to assign the sampleIDs in the VCF file
+
+library(tidyverse)
+dartvcfInput<-here::here("data/Report-DCas21-5841","Report_5841_VCF_Ref_Version6.txt")
+dartcountsInput<-here::here("data/Report-DCas21-5841","Report_5841_Counts_Ref_Version6.csv")
+outName<-here::here("data/Report-DCas21-5841","DCas21_5841")
+nskipvcf<-2 
+nskipcounts<-3
+ncores<-10
+```
+
+# Prelim. check format
+
+Start manual. Check that the files read in according to previous code. Adjust code if necessary. Make a function and apply it to the input files.
+
+```{r, eval=F}
+vcf<-read.table(dartvcfInput,
+                stringsAsFactors = F,skip = nskipvcf, header = T, sep = "\t", comment.char = "")
+readCounts<-read.csv(dartcountsInput, stringsAsFactors = F,header = T,skip=nskipcounts)
+
+dim(vcf)
+# [[1] 13603   443
+dim(readCounts)
+# [1] 27206   477
+# 
+# 
+# # Initial look at names....
+colnames(readCounts)[1:100]
+#  [1] "AlleleID"                                
+#  [2] "CloneID"                                 
+#  [3] "ClusterTempIndex"                        
+#  [4] "AlleleSequence"                          
+#  [5] "TrimmedSequence"                         
+#  [6] "TrimmedSequence_plus_Strand"             
+#  [7] "Short"                                   
+#  [8] "Lowcomplexity"                           
+#  [9] "Chrom_Cassava_v61"                       
+# [10] "ChromPos_Cassava_v61"                    
+# [11] "SNP_ChromPos_Cassava_v61"                
+# [12] "AlnCnt_Cassava_v61"                      
+# [13] "AlnEvalue_Cassava_v61"                   
+# [14] "Strand_Cassava_v61"                      
+# [15] "SeqDiff_Cassava_v61"                     
+# [16] "ClusterConsensusSequence"                
+# [17] "ClusterSize"                             
+# [18] "AlleleSeqDist"                           
+# [19] "SNP"                                     
+# [20] "SnpPosition"                             
+# [21] "CallRate"                                
+# [22] "OneRatioRef"                             
+# [23] "OneRatioSnp"                             
+# [24] "FreqHomRef"                              
+# [25] "FreqHomSnp"                              
+# [26] "FreqHets"                                
+# [27] "PICRef"                                  
+# [28] "PICSnp"                                  
+# [29] "AvgPIC"                                  
+# [30] "AvgCountRef"                             
+# [31] "AvgCountSnp"                             
+# [32] "RatioAvgCountRefAvgCountSnp"             
+# [33] "FreqHetsMinusFreqMinHom"                 
+# [34] "AlleleCountsCorrelation"                 
+# [35] "aggregateTagsTotal"                      
+# [36] "DerivedCorrMinusSeedCorr"                
+# [37] "RepRef"                                  
+# [38] "RepSNP"                                  
+# [39] "RepAvg"                                  
+# [40] "PicRepRef"                               
+# [41] "PicRepSNP"                               
+# [42] "TotalPicRepRefTest"                      
+# [43] "TotalPicRepSnpTest"                      
+# [44] "NR20.NG.C3.Cass.0001_C01...NR20C3F1P0003"
+# [45] "NR20.NG.C3.Cass.0001_D01...NR20C3F1P0004"
+# [46] "NR20.NG.C3.Cass.0001_E01...NR20C3F1P0005"
+# [47] "NR20.NG.C3.Cass.0001_F01...NR20C3F1P0006"
+# [48] "NR20.NG.C3.Cass.0001_G01...NR20C3F1P0007"
+# [49] "NR20.NG.C3.Cass.0001_H01...NR20C3F2P0001"
+# [50] "NR20.NG.C3.Cass.0001_A02...NR20C3F2P0003"
+# [51] "NR20.NG.C3.Cass.0001_B02...NR20C3F2P0004"
+# [52] "NR20.NG.C3.Cass.0001_C02...NR20C3F2P0005"
+# [53] "NR20.NG.C3.Cass.0001_D02...NR20C3F2P0006"
+# [54] "NR20.NG.C3.Cass.0001_E02...NR20C3F2P0007"
+# [55] "NR20.NG.C3.Cass.0001_F02...NR20C3F2P0008"
+# [56] "NR20.NG.C3.Cass.0001_H02...NR20C3F2P0010"
+# [57] "NR20.NG.C3.Cass.0001_A03...NR20C3F2P0011"
+# [58] "NR20.NG.C3.Cass.0001_B03...NR20C3F2P0012"
+# [59] "NR20.NG.C3.Cass.0001_C03...NR20C3F2P0013"
+# [60] "NR20.NG.C3.Cass.0001_D03...NR20C3F2P0014"
+
+colnames(vcf)[1:30]
+#  [1] "X.CHROM"                                 
+#  [2] "POS"                                     
+#  [3] "ID"                                      
+#  [4] "REF"                                     
+#  [5] "ALT"                                     
+#  [6] "QUAL"                                    
+#  [7] "FILTER"                                  
+#  [8] "INFO"                                    
+#  [9] "FORMAT"                                  
+# [10] "NR20.NG.C3.Cass.0001_A01...NR20C3F1P0001"
+# [11] "NR20.NG.C3.Cass.0001_A10...NR20C3F4P0007"
+# [12] "NR20.NG.C3.Cass.0001_A11...NR20C3F4P0016"
+# [13] "NR20.NG.C3.Cass.0001_A12...NR20C3F4P0025"
+# [14] "NR20.NG.C3.Cass.0001_A02...NR20C3F2P0003"
+# [15] "NR20.NG.C3.Cass.0001_A03...NR20C3F2P0011"
+# [16] "NR20.NG.C3.Cass.0001_A04...NR20C3F2P0020"
+# [17] "NR20.NG.C3.Cass.0001_A05...NR20C3F2P0028"
+# [18] "NR20.NG.C3.Cass.0001_A06...NR20C3F3P0003"
+# [19] "NR20.NG.C3.Cass.0001_A07...NR20C3F3P0011"
+# [20] "NR20.NG.C3.Cass.0001_A08...NR20C3F3P0021"
+# [21] "NR20.NG.C3.Cass.0001_A09...NR20C3F3P0030"
+# [22] "NR20.NG.C3.Cass.0001_B01...NR20C3F1P0002"
+# [23] "NR20.NG.C3.Cass.0001_B10...NR20C3F4P0008"
+# [24] "NR20.NG.C3.Cass.0001_B11...NR20C3F4P0017"
+# [25] "NR20.NG.C3.Cass.0001_B12...NR20C3F4P0026"
+# [26] "NR20.NG.C3.Cass.0001_B02...NR20C3F2P0004"
+# [27] "NR20.NG.C3.Cass.0001_B03...NR20C3F2P0012"
+# [28] "NR20.NG.C3.Cass.0001_B04...NR20C3F2P0021"
+# [29] "NR20.NG.C3.Cass.0001_B05...NR20C3F2P0029"
+# [30] "NR20.NG.C3.Cass.0001_B06...NR20C3F3P0004"
+
+# rm(vcf,readCounts); gc()
+```
+
+# Conversion function
+
+Available and sourced from `code/` subdirectory: `convertDart2vcf.R`.
+
+# Run conversion function
+```{r, eval=F}
+source(here::here("code/","convertDart2vcf.R"))
+convertDart2vcf(dartvcfInput,dartcountsInput,outName,
+                nskipvcf=2,nskipcounts=3,ncores)
+```
+
+# Genomewide to per-chrom VCFs
+
+Split the genome-wide VCF into per-chromosome VCFs for imputation.
+
+```{r,eval = FALSE}
+require(furrr); options(mc.cores=18); plan(multiprocess)
+source(here::here("code","imputationFunctions.R"))
+
+vcfIn<-here::here("data/Report-DCas21-5841","DCas21_5841.vcf.gz")
+filters<-"--minDP 4 --maxDP 50" # because using GT not PL for impute (Beagle5)
+outPath<-here::here("data/Report-DCas21-5841/")
+outSuffix<-"DCas21_5841"
+
+future_map(1:18,
+           ~splitVCFbyChr(Chr=.,
+                          vcfIn=vcfIn,filters=filters,
+                          outPath=outPath,outSuffix=outSuffix))
+
+```
+

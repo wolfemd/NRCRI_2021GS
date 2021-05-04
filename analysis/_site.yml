@@ -5,13 +5,34 @@ navbar:
   left:
   - text: Home
     href: index.html
-  - text: About
-    href: about.html
-  - text: License
-    href: license.html
+  - text: Imputation (DCas21_5841)
+    menu:
+    - text: Conversion DArT report DCas21_5841 to VCF
+      href: convertDCas21_5841_ToVCF.html
+    - text: Impute DCas21_5841
+      href: ImputeDCas21_5841.html
+  - text: Prediction (April 2021)
+    menu:
+    - text: Data Cleaning
+      href: 01-cleanTPdata.html
+    - text: Get BLUPs
+      href: 02-GetBLUPs.html
+    - text: Check prediction accuracy
+      href: 03-CrossValidation.html
+    - text: Get GEBV/GETGV for GS C3b
+      href: 04-GetGBLUPs.html
+  - text: Results
+    href: 05-Results.html
+
+  - text: Other
+    menu:
+    - text: About
+      href: about.html
+    - text: License
+      href: license.html
 output:
   workflowr::wflow_html:
     toc: yes
     toc_float: yes
-    theme: cosmo
-    highlight: textmate
+    theme: yeti
+    highlight: breezedark
