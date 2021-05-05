@@ -1,0 +1,179 @@
+---
+title: "Genomic predictions"
+author: "Marnin Wolfe"
+date: "2021-May-03"
+output: 
+  workflowr::wflow_html:
+    toc: true
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = F, 
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
+```
+
+# Previous step
+
+3. [Check prediction accuracy](03-CrossValidation.html): Evaluate prediction accuracy with cross-validation.
+
+# Objective
+
+**Current Step**  
+
+4. [Genomic prediction](04-GetGBLUPs.html): Predict _genomic_ BLUPs (GEBV and GETGV) for all selection candidates using all available data.
+
+# Set-up
+```{bash, eval=F}
+cd /home/jj332_cas/marnin/NRCRI_2021GS/; 
+export OMP_NUM_THREADS=56 # activate multithread OpenBLAS 
+```
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); 
+source(here::here("code","gsFunctions.R"))
+A<-readRDS(file=here::here("output","Kinship_A_NRCRI_2021May03.rds"))
+
+# BLUPs from the 2 stage procedure
+# (stage 1 of 2) 
+blups<-readRDS(file=here::here("output","NRCRI_blupsForModelTraining_twostage_asreml_2021May03.rds")) %>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  select(-`std error`) %>% 
+  filter(GID %in% rownames(A)) %>% 
+  nest(TrainingData=-Trait)
+```
+
+# Prediction
+
+`runGenomicPredictions()`
+
+cbsurobbins (112 cores; 512GB) 
+
+Model A
+```{r, eval=F}
+options(future.globals.maxSize= 1500*1024^2)
+predModelA<-runGenomicPredictions(blups,modelType="A",grms=list(A=A),gid="GID",ncores=14)
+saveRDS(predModelA,file = here::here("output","genomicPredictions_ModelA_twostage_NRCRI_2021May03.rds"))
+```
+
+Model ADE
+```{r, eval=F}
+D<-readRDS(file=here::here("output","Kinship_D_NRCRI_2021May03.rds"))
+AD<-readRDS(file=here::here("output","Kinship_AD_NRCRI_2021May03.rds"))
+options(future.globals.maxSize= 3000*1024^2)
+predModelADE<-runGenomicPredictions(blups,modelType="ADE",grms=list(A=A,D=D,AD=AD),gid="GID",ncores=14)
+saveRDS(predModelADE,file = here::here("output","genomicPredictions_ModelADE_twostage_NRCRI_2021May03.rds"))
+```
+
+# Write GEBV/GETV to disk
+
+```{r}
+rm(list=ls()); gc()
+library(tidyverse); library(magrittr);
+predModelA<-readRDS(file = here::here("output","genomicPredictions_ModelA_twostage_NRCRI_2021May03.rds"))
+predModelADE<-readRDS(file = here::here("output","genomicPredictions_ModelADE_twostage_NRCRI_2021May03.rds"))
+traits<-c("CGM","CGMS1","CGMS2","MCMDS",
+          "DM","DMsg","PLTHT","BRNHT1","HI",
+          "logDYLD","logFYLD","logTOPYLD","logRTNO")
+```
+
+```{r}
+unique_gids<-predModelA %>%
+  dplyr::select(genomicPredOut) %>%
+  unnest(genomicPredOut) %>%
+  select(-varcomps) %>%
+  unnest(gblups) %$%
+  GID %>%
+  unique
+
+c1a<-unique_gids %>%
+  grep("c1a",.,value = T,ignore.case = T) %>%
+  union(.,unique_gids %>%
+          grep("^F",.,value = T,ignore.case = T) %>%
+          grep("c1b",.,value = T,ignore.case = T,invert = T))
+c1b<-unique_gids%>% grep("c1b",.,value = T,ignore.case = T)
+c2a<-unique_gids %>%
+  grep("C2a",.,value = T,ignore.case = T) %>%
+  grep("NR17",.,value = T,ignore.case = T)
+c2b<-unique_gids %>%
+  grep("C2b",.,value = T,ignore.case = T) %>%
+  .[!. %in% c(c1a,c1b,c2a)]
+c3a<-unique_gids %>%
+  grep("C3a",.,value = T,ignore.case = T) %>%
+  .[!. %in% c(c1a,c1b,c2a,c2b)]
+c3b<-unique_gids %>%
+  grep("NR20C3",.,value = T,ignore.case = T) %>%
+  .[!. %in% c(c1a,c1b,c2a,c2b,c3a)]
+nrTP<-setdiff(unique_gids,unique(c(c1a,c1b,c2a,c2b,c3a,c3b)))
+```
+
+```{r}
+## Format and write GEBV
+predModelA %>% 
+  select(Trait,genomicPredOut) %>% 
+  unnest(genomicPredOut) %>% 
+  select(-varcomps) %>% 
+  unnest(gblups) %>% 
+  select(-GETGV,-contains("PEV")) %>%
+  spread(Trait,GEBV) %>% 
+  mutate(Group=case_when(GID %in% nrTP ~ "nrTP",
+                         GID %in% c1a ~ "C1a",
+                         GID %in% c1b ~ "C1b",
+                         GID %in% c2a ~ "C2a",
+                         GID %in% c2b ~ "C2b",
+                         GID %in% c3a ~ "C3a",
+                         GID %in% c3b ~ "C3b")) %>% 
+  select(Group,GID,any_of(traits)) %>% 
+  arrange(desc(Group)) %>% 
+  write.csv(., file = here::here("output","GEBV_NRCRI_ModelA_2021May03.csv"), row.names = F)
+
+## Format and write GETGV
+predModelADE %>% 
+  select(Trait,genomicPredOut) %>% 
+  unnest(genomicPredOut) %>% 
+  select(-varcomps) %>% 
+  unnest(gblups) %>% 
+  select(GID,Trait,GETGV) %>% 
+  spread(Trait,GETGV) %>% 
+  mutate(Group=case_when(GID %in% nrTP ~ "nrTP",
+                         GID %in% c1a ~ "C1a",
+                         GID %in% c1b ~ "C1b",
+                         GID %in% c2a ~ "C2a",
+                         GID %in% c2b ~ "C2b",
+                         GID %in% c3a ~ "C3a",
+                         GID %in% c3b ~ "C3b")) %>% 
+  select(Group,GID,any_of(traits)) %>% 
+  arrange(desc(Group)) %>% 
+  write.csv(., file = here::here("output","GETGV_NRCRI_ModelADE_2021May03.csv"), row.names = F)
+
+### Make a unified "tidy" long-form: 
+predModelA %>% 
+  select(Trait,genomicPredOut) %>% 
+  unnest(genomicPredOut) %>% 
+  select(-varcomps) %>% 
+  unnest(gblups) %>% 
+  select(-GETGV) %>% 
+  full_join(predModelADE %>% 
+              select(Trait,genomicPredOut) %>% 
+              unnest(genomicPredOut) %>% 
+              select(-varcomps) %>% 
+              unnest(gblups) %>% 
+              rename(GEBV_modelADE=GEBV,
+                     PEV_modelADE=PEVa) %>% 
+              select(-genomicPredOut)) %>% 
+  mutate(Group=case_when(GID %in% nrTP ~ "nrTP",
+                         GID %in% c1a ~ "C1a",
+                         GID %in% c1b ~ "C1b",
+                         GID %in% c2a ~ "C2a",
+                         GID %in% c2b ~ "C2b",
+                         GID %in% c3a ~ "C3a",
+                         GID %in% c3b ~ "C3b")) %>% 
+  relocate(Group,.before = GID) %>% 
+  write.csv(., file = here::here("output","genomicPredictions_NRCRI_2021May03.csv"), row.names = F)
+```
+
+# Results
+
+See [Results](05-Results.html): Home for plots and summary tables.

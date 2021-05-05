@@ -1,0 +1,248 @@
+---
+title: "Check prediction accuracy"
+author: "Marnin Wolfe"
+date: "2021-May-03"
+output: 
+  workflowr::wflow_html:
+    toc: true
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = F, 
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
+```
+# Previous step
+
+2. [Get BLUPs combining all trial data](02-GetBLUPs.html): Combine data from all trait-trials to get BLUPs for downstream genomic prediction. 
+    -   Fit mixed-model to multi-trial dataset and extract BLUPs, de-regressed BLUPs and weights. Include two rounds of outlier removal.
+
+# Cross-validation
+
+5-fold cross-validation. Replicate 5-times.
+
+2 genomic models:
+
+1.  Additive-only (**A**)
+2.  Addititive plus dominance plus additive-by-dominance epistasis (**ADE**)
+
+# Prep. genomic data
+
+## Get SNP data from FTP
+
+The data for the next step can be found on the cassavabase FTP server [here](ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/).
+
+Can be loaded directly to R from FTP.
+
+**NOTICE:** You need enough RAM and a stable network connection. I do the next steps, including cross-validation on a server with plenty of RAM and a good, stable network connection, rather than on my personal computer (a laptop with 16 GB RAM).
+
+The outputs (kinship matrices and filtered snp dosages) of the steps below, which are too large for GitHub, can be found on the cassavabase FTP server [here](ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/).
+
+```{bash, eval=F}
+# activate multithread OpenBLAS for fast compute of SigmaM (genotypic var-covar matrix)
+cd /home/jj332_cas/marnin/NRCRI_2021GS/; 
+export OMP_NUM_THREADS=56
+```
+
+```{r, eval=F}
+library(tidyverse); library(magrittr); 
+# RefPanel (including primary TP and original GS progeny)
+# Dosage matrix
+snps_refpanel<-readRDS(file=url(paste0("ftp://ftp.cassavabase.org/marnin_datasets/NGC_BigData/",
+                              "DosageMatrix_RefPanelAndGSprogeny_ReadyForGP_73019.rds")))
+# 2020 GS progeny dosages (C3a)
+## these don't have phenotypes yet. including for convenience 
+## and so we don't get suprised by their absence in the next iteration
+snps5510<-readRDS(file=url(paste0("ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2020GS/output/",
+                                  "DosageMatrix_DCas20_5510_WA_REFimputedAndFiltered.rds")))
+snps5440<-readRDS(file=url(paste0("ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2020GS/output/",
+                                  "DosageMatrix_DCas20_5440_WA_REFimputedAndFiltered.rds")))
+## DCas21-5841 Dosage matrix (C3b)
+snps5841<-readRDS(here::here("output","DosageMatrix_DCas21_5841_WA_REFimputedAndFiltered.rds"))
+
+snps2keep<-colnames(snps_refpanel) %>% 
+  .[. %in% colnames(snps5841)] %>% 
+  .[. %in% colnames(snps5510)] %>% 
+  .[. %in% colnames(snps5440)]
+
+snps<-rbind(snps_refpanel[,snps2keep],
+            snps5510[,snps2keep]) %>% 
+  rbind(.,snps5440[,snps2keep]) %>% 
+  rbind(.,snps5841[,snps2keep])
+gc()
+dim(snps) # [1] 22936 20559
+
+#rm(list=(ls() %>% grep("snps",.,value = T, invert = T)))
+```
+
+```{r, eval=F}
+blups<-readRDS(file=here::here("output","NRCRI_blupsForModelTraining_twostage_asreml_2021May03.rds"))
+blups %<>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  select(-`std error`) %>% 
+  filter(GID %in% rownames(snps))
+table(unique(blups$GID) %in% rownames(snps)) 
+# TRUE
+# 3114
+```
+
+```{r, eval=F}
+samples2Keep<-unique(blups$GID) %>% 
+  union(.,grep("c2|c3",rownames(snps),value = T, ignore.case = T)) %>% 
+  union(.,rownames(snps5510)) %>% 
+  union(.,rownames(snps5440)) %>% 
+  union(.,rownames(snps5841))
+
+length(samples2Keep) # [1] 7286 
+snps<-snps[samples2Keep,]; 
+gc()
+```
+
+## MAF\>1% filter
+
+```{r, eval=F}
+source(here::here("code","gsFunctions.R"))
+snps %<>% maf_filter(.,0.01)
+dim(snps) # [1]  7286 20550
+```
+
+## Make Add, Dom and Epi kinships
+
+Going to use my own kinship function.
+
+Make the kinships.
+
+Below e.g. `A*A` makes a matrix that approximates additive-by-additive epistasis relationships.
+
+```{r, eval=F}
+A<-kinship(snps,type="add")
+D<-kinship(snps,type="dom")
+AD<-A*D
+
+saveRDS(snps,file=here::here("output","DosageMatrix_NRCRI_2021May03.rds"))
+saveRDS(A,file=here::here("output","Kinship_A_NRCRI_2021May03.rds"))
+saveRDS(D,file=here::here("output","Kinship_D_NRCRI_2021May03.rds"))
+saveRDS(AD,file=here::here("output","Kinship_AD_NRCRI_2021May03.rds"))
+#rm(snps); gc()
+```
+
+**NOTICE:** The outputs (kinship matrices and filtered snp dosages) of the steps below, which are too large for GitHub, can be found on the cassavabase FTP server [here](ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/).
+
+# Cross-validation
+
+
+```{bash, eval=F}
+cd /home/jj332_cas/marnin/NRCRI_2021GS/; 
+export OMP_NUM_THREADS=56 # activate multithread OpenBLAS 
+##### [considered] 
+######/programs/R-4.0.0/bin/R # switched to R V4, having trouble with sommer/Matrix in v3.5
+## may have to reinstall packages
+```
+
+## Set-up training-testing data
+
+```{r}
+rm(list=ls())
+library(tidyverse); library(magrittr); 
+source(here::here("code","gsFunctions.R"))
+blups<-readRDS(file=here::here("output","NRCRI_blupsForModelTraining_twostage_asreml_2021May03.rds"))
+
+A<-readRDS(file=here::here("output","Kinship_A_NRCRI_2021May03.rds"))
+blups %<>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  select(-`std error`) %>% 
+  filter(GID %in% rownames(A))
+
+cv2do<-blups %>%
+  nest(TrainTestData=-Trait)
+cv2do %>% rmarkdown::paged_table()
+# # A tibble: 12 x 2
+#    Trait     TrainTestData     
+#    <chr>     <list>            
+#  1 CGMS1     <tibble [2,986 × 6]>
+#  2 CGMS2     <tibble [2,144 × 6]>
+#  3 MCMDS     <tibble [2,987 × 6]>
+#  4 DMsg      <tibble [791 × 6]>  
+#  5 PLTHT     <tibble [2,505 × 6]>
+#  6 BRNHT1    <tibble [1,860 × 6]>
+#  7 HI        <tibble [2,711 × 6]>
+#  8 logFYLD   <tibble [2,688 × 6]>
+#  9 logTOPYLD <tibble [2,702 × 6]>
+# 10 logRTNO   <tibble [2,693 × 6]>
+# 11 DM        <tibble [2,130 × 6]>
+# 12 logDYLD   <tibble [2,064 × 6]>
+```
+
+```{r}
+cv2do$TrainTestData[[6]] %>% head %>% rmarkdown::paged_table()
+#                         GID       BLUP       PEV       REL    drgBLUP       WT
+# 1  AR124:250107818  8.647876 46.46010 0.4054099  21.331190 7.276556
+# 2 AR1410:250399710  4.063514 44.17898 0.4346033   9.349938 8.137156
+# 3  AR144:250107805 -5.134758 44.26454 0.4335084 -11.844655 8.103540
+# 4  AR155:250134515 -6.878125 54.83950 0.2981715 -23.067685 4.645796
+# 5  AR182:250134520 -2.311664 62.32273 0.2024021 -11.421147 2.821257
+# 6  AR311:250134529  4.939141 58.27090 0.2542569  19.425787 3.758532
+```
+
+The function below `runCrossVal()` function implements nfold cross-validation. Specifically, for each of **nrepeats** it splits the data into **nfolds** sets according to **gid**. So if `nfolds=5` then the the clones will be divided into 5 groups and 5 predictions will be made. In each prediction, 4/5 of the clones will be used to predict the remaining 1/5. Accuracy of the model is measured as the correlation between the BLUPs (adj. mean for each CLONE) in the *test set* and the GEBV (the prediction made of each clone when it was in the test set).
+
+Below, 20 reps x 5-fold cross-validation are run on 1 large memory Cornell CBSU machine each (e.g. [cbsulm29; 104 cores, 512 GB RAM](https://biohpc.cornell.edu/lab/hardware.aspx)).
+
+## CV - modelType="A"
+
+```{r, eval=F}
+starttime<-proc.time()[3]
+cv_A<-cv2do %>% 
+  mutate(CVresults=map(TrainTestData,~runCrossVal(TrainTestData=.,
+                                                  modelType="A",
+                                                  grms=list(A=A),
+                                                  byGroup=FALSE,augmentTP=NULL,
+                                                  nrepeats=20,nfolds=5,ncores=25,gid="GID")))
+runtime<-proc.time()[3]-starttime; runtime
+
+cv_A %<>% mutate(modelType="A") %>% dplyr::select(-TrainTestData)
+saveRDS(cv_A,file=here::here("output","cvresults_A_2021May03.rds"))
+```
+
+## CV - modelType="ADE"
+
+```{r, eval=F}
+# split it to two tranches of 10 reps
+ 
+options(future.globals.maxSize= 3000*1024^2)
+D<-readRDS(file=here::here("output","Kinship_D_NRCRI_2021May03.rds"))
+AD<-readRDS(file=here::here("output","Kinship_AD_NRCRI_2021May03.rds"))
+starttime<-proc.time()[3]
+cv_ADE_1<-cv2do %>% 
+  mutate(CVresults=map(TrainTestData,~runCrossVal(TrainTestData=.,
+                                                  modelType="ADE",
+                                                  grms=list(A=A,D=D,AD=AD),
+                                                  byGroup=FALSE,augmentTP=NULL,
+                                                  nrepeats=10,nfolds=5,ncores=5,gid="GID")))
+cv_ADE_1 %<>% mutate(modelType="ADE") %>% dplyr::select(-TrainTestData)
+saveRDS(cv_ADE_1,file=here::here("output","cvresults_ADE_1_2021May03.rds"))
+runtime<-proc.time()[3]-starttime; runtime
+
+starttime<-proc.time()[3]
+cv_ADE_2<-cv2do %>% 
+  mutate(CVresults=map(TrainTestData,~runCrossVal(TrainTestData=.,
+                                                  modelType="ADE",
+                                                  grms=list(A=A,D=D,AD=AD),
+                                                  byGroup=FALSE,augmentTP=NULL,
+                                                  nrepeats=10,nfolds=5,ncores=5,gid="GID")))
+cv_ADE_2 %<>% mutate(modelType="ADE") %>% dplyr::select(-TrainTestData)
+saveRDS(cv_ADE_2,file=here::here("output","cvresults_ADE_2_2021May03.rds"))
+runtime<-proc.time()[3]-starttime; runtime
+
+```
+
+# Results
+
+See [Results](05-Results.html): Home for plots and summary tables.
+
+# Next step
+
+4. [Genomic prediction](04-GetGBLUPs.html): Predict _genomic_ BLUPs (GEBV and GETGV) for all selection candidates using all available data.

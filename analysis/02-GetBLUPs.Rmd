@@ -1,0 +1,170 @@
+---
+title: "Get BLUPs combining all trial data"
+author: "Marnin Wolfe"
+date: "2021-May-03"
+output: 
+  workflowr::wflow_html:
+    toc: true
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = F, 
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
+```
+
+# Previous step 
+
+1. [Prepare training dataset](01-cleanTPdata.html): Download data from DB, "Clean" and format DB data.
+
+# Get multi-trial BLUPs from raw data (two-stage)
+
+Two-stage procedure: 
+
+1. Fit mixed-model to multi-trial dataset and extract BLUPs, de-regressed BLUPs and weights. Include two rounds of outlier removal.
+2. Genomic prediction with drg-BLUPs from multi-trial analysis as input. 
+
+**Work below represents Stage 1 of the Two-stage procedure.**
+
+## Set-up training datasets
+```{bash, eval=F}
+# activate multithread OpenBLAS for fast matrix algebra
+export OMP_NUM_THREADS=56
+```
+```{r, message=F}
+rm(list=ls())
+library(tidyverse); library(magrittr);
+source(here::here("code","gsFunctions.R"))
+dbdata<-readRDS(here::here("output","NRCRI_ExptDesignsDetected_2021May03.rds"))
+traits<-c("CGM","CGMS1","CGMS2","MCMDS",
+          "DM","DMsg","PLTHT","BRNHT1","HI",
+          "logDYLD","logFYLD","logTOPYLD","logRTNO")
+
+# **Nest by trait.** Need to restructure the data from per-trial by regrouping by trait. 
+dbdata<-nestDesignsDetectedByTraits(dbdata,traits)
+```
+
+```{r}
+dbdata %>% mutate(N_blups=map_dbl(MultiTrialTraitData,nrow)) %>% rmarkdown::paged_table()
+```
+
+To fit the mixed-model I used last year, I am again resorting to `asreml`. I fit random effects for rep and block only where complete and incomplete blocks, respectively are indicated in the trial design variables. `sommer` should be able to fit the same model via the `at()` function, _but_ I am having trouble with it _and_ `sommer` is much slower even without a dense covariance (i.e. a kinship), compared to `lme4::lmer()` or `asreml()`. 
+
+```{r}
+dbdata %<>% 
+  mutate(fixedFormula=ifelse(Trait %in% c("logDYLD","logFYLD","logRTNO","logTOPYLD"),
+                             "Value ~ yearInLoc + PropNOHAV","Value ~ yearInLoc"),
+         randFormula=paste0("~idv(GID) + idv(trialInLocYr) + at(CompleteBlocks,'Yes'):repInTrial ",
+                            "+ at(IncompleteBlocks,'Yes'):blockInRep"))
+dbdata %>% 
+  mutate(Nobs=map_dbl(MultiTrialTraitData,nrow)) %>% 
+  select(Trait,Nobs,fixedFormula,randFormula) %>% 
+  rmarkdown::paged_table()
+```
+
+```{r}
+# randFormula<-paste0("~vs(GID) + vs(trialInLocYr) + vs(at(CompleteBlocks,'Yes'),repInTrial) + vs(at(IncompleteBlocks,'Yes'),blockInRep)")
+# library(sommer)
+# fit <- mmer(fixed = Value ~ 1 + yearInLoc,
+#             random = as.formula(randFormula),
+#             data=trainingdata,
+#             getPEV=TRUE)
+```
+
+## Function to run asreml
+
+Includes rounds of outlier removal and re-fitting.
+
+```{r, eval=F}
+fitASfunc<-function(fixedFormula,randFormula,MultiTrialTraitData,...){
+  # test arguments for function
+  # ----------------------
+  # MultiTrialTraitData<-dbdata$MultiTrialTraitData[[7]]
+  # #Trait<-dbdata$Trait[[3]]
+  # fixedFormula<-dbdata$fixedFormula[[7]]
+  # randFormula<-dbdata$randFormula[[7]]
+  # test<-fitASfunc(fixedFormula,randFormula,MultiTrialTraitData)
+  # ----------------------
+  require(asreml); 
+  fixedFormula<-as.formula(fixedFormula)
+  randFormula<-as.formula(randFormula)
+  # fit asreml 
+  out<-asreml(fixed = fixedFormula,
+              random = randFormula,
+              data = MultiTrialTraitData, 
+              maxiter = 40, workspace=800e6, na.method.X = "omit")
+  #### extract residuals - Round 1
+  
+  outliers1<-which(abs(scale(out$residuals))>3.3)
+  
+  if(length(outliers1)>0){
+    
+    x<-MultiTrialTraitData[-outliers1,]
+    # re-fit
+    out<-asreml(fixed = fixedFormula,
+                random = randFormula,
+                data = x, 
+                maxiter = 40, workspace=800e6, na.method.X = "omit")
+    #### extract residuals - Round 2
+    outliers2<-which(abs(scale(out$residuals))>3.3)
+    if(length(outliers2)>0){
+      #### remove outliers
+      x<-x[-outliers2,]
+      # final re-fit
+      out<-asreml(fixed = fixedFormula,
+                  random = randFormula,
+                  data = x, maxiter = 40,workspace=800e6, na.method.X = "omit")
+    }
+  }
+  if(length(outliers1)==0){ outliers1<-NULL }
+  if(length(outliers2)==0){ outliers2<-NULL }
+  
+  ll<-summary(out,all=T)$loglik
+  varcomp<-summary(out,all=T)$varcomp
+  Vg<-varcomp["GID!GID.var","component"]
+  Ve<-varcomp["R!variance","component"]
+  H2=Vg/(Vg+Ve)
+  blups<-summary(out,all=T)$coef.random %>%
+    as.data.frame %>%
+    rownames_to_column(var = "GID") %>%
+    dplyr::select(GID,solution,`std error`) %>%
+    filter(grepl("GID",GID)) %>%
+    rename(BLUP=solution) %>%
+    mutate(GID=gsub("GID_","",GID),
+           PEV=`std error`^2, # asreml specific
+           REL=1-(PEV/Vg), # Reliability
+           drgBLUP=BLUP/REL, # deregressed BLUP
+           WT=(1-H2)/((0.1 + (1-REL)/REL)*H2)) # weight for use in Stage 2
+  out<-tibble(loglik=ll,Vg,Ve,H2,
+              blups=list(blups),
+              varcomp=list(varcomp),
+              outliers1=list(outliers1),
+              outliers2=list(outliers2))
+  return(out) }
+```
+
+## Run asreml
+```{r, eval=F}
+library(furrr); options(mc.cores=14); plan(multiprocess)
+library(asreml)
+dbdata %<>% 
+  mutate(fitAS=future_pmap(.,fitASfunc))
+dbdata %<>%
+  select(-fixedFormula,-randFormula,-MultiTrialTraitData) %>%
+  unnest(fitAS)
+```
+
+## Output file
+```{r, eval=F}
+saveRDS(dbdata,file=here::here("output","NRCRI_blupsForModelTraining_twostage_asreml_2021May03.rds"))
+```
+
+# Results
+
+See [Results](05-Results.html): Home for plots and summary tables.
+
+# Next step
+
+3. [Check prediction accuracy](03-CrossValidation.html): Evaluate prediction accuracy with cross-validation.
+

@@ -493,6 +493,15 @@ dbdata %<>%
   mutate(GID=ifelse(is.na(FullSampleName),germplasmName,FullSampleName))
 ```
 
+### Write lists for matching genos-to-phenos
+```{r, eval=F}
+dbdata %>% 
+  distinct(GID,germplasmName,FullSampleName) %>% 
+  write.csv(.,
+            file = here::here("output","OnlyChosen_germplasmName_to_FullSampleName_matches_NRCRI_2021May03.csv"), 
+            row.names = F)
+```
+
 
 ## Output "cleaned" file
 

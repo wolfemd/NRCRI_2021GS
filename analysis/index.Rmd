@@ -58,9 +58,9 @@ Get NRCRI TP data from Cassavabase. Use it with imputed data to predict GEBV/GET
 
 **OUTPUT / FILES**: everything is in the `output/` sub-directory. 
 
--  **GEBVs for parent selection:** `GEBV_NRCRI_ModelA_2021April29.csv`
--  **GETGVs for variety advancement:** `GETGV_NRCRI_ModelADE_2021April29.csv`
--  **Tidy, long-form CSV of predictions, including PEVs:** `genomicPredictions_NRCRI_2021April29.csv`
+-  **GEBVs for parent selection:** `GEBV_NRCRI_ModelA_2021May03.csv`
+-  **GETGVs for variety advancement:** `GETGV_NRCRI_ModelADE_2021May03.csv`
+-  **Tidy, long-form CSV of predictions, including PEVs:** `genomicPredictions_NRCRI_2021May03.csv`
 
 [**DOWNLOAD FROM CASSAVABASE FTP SERVER**](ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/output/)
 

@@ -1,0 +1,244 @@
+---
+title: "Results"
+site: workflowr::wflow_site
+date: "2021-May-05"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = F, 
+                      tidy='styler', tidy.opts=list(strict=FALSE,width.cutoff=100), highlight=TRUE)
+```
+
+# Raw data
+
+Summary of the number of unique plots, locations, years, etc. in the cleaned plot-basis data. See [here](01-cleanTPdata.html) for details..
+```{r}
+library(tidyverse); library(magrittr);
+rawdata<-readRDS(file=here::here("output","NRCRI_ExptDesignsDetected_2021May03.rds"))
+rawdata %>% 
+  summarise(Nplots=nrow(.),
+            across(c(locationName,studyYear,studyName,TrialType,GID), ~length(unique(.)),.names = "N_{.col}")) %>% 
+  rmarkdown::paged_table()
+```
+
+4575 unique clone names in the phenotype data, across >35K plots. 
+
+This _is not_ the same number of clones as are expected to be genotyped-and-phenotyped.
+
+Break down the plots based on the trial design and TrialType (really a grouping of the population that is breeding program specific), captured by two logical variables, **CompleteBlocks** and **IncompleteBlocks**.  
+```{r}
+rawdata %>% 
+  count(TrialType,CompleteBlocks,IncompleteBlocks) %>% 
+  spread(TrialType,n) %>% 
+  rmarkdown::paged_table()
+```
+
+Next, look at breakdown of plots by TrialType (rows) and locations (columns):
+```{r, cols.print=16}
+rawdata %>% 
+  count(locationName,TrialType) %>% 
+  spread(locationName,n) %>% 
+  rmarkdown::paged_table()
+```
+
+```{r}
+traits<-c("CGM","CGMS1","CGMS2","MCMDS",
+          "DM","DMsg","PLTHT","BRNHT1","HI",
+          "logDYLD","logFYLD","logTOPYLD","logRTNO")
+rawdata %>% 
+  select(locationName,studyYear,studyName,TrialType,any_of(traits)) %>% 
+  pivot_longer(cols = any_of(traits), values_to = "Value", names_to = "Trait") %>% 
+  ggplot(.,aes(x=Value,fill=Trait)) + geom_histogram() + facet_wrap(~Trait, scales='free') + 
+  theme_bw() + scale_fill_viridis_d() + 
+  labs(title = "Distribution of Raw Phenotypic Values")
+```
+How many genotyped-and-phenotyped clones?
+
+```{r}
+rawdata %>% 
+  select(locationName,studyYear,studyName,TrialType,germplasmName,FullSampleName,GID,any_of(traits)) %>% 
+  pivot_longer(cols = any_of(traits), values_to = "Value", names_to = "Trait") %>%
+  filter(!is.na(Value),!is.na(FullSampleName)) %>%
+  distinct(germplasmName,FullSampleName,GID) %>% 
+  rmarkdown::paged_table()
+```
+There are 3212 genotyped-and-phenotyped clones! 
+
+Table of germplasmName-DNA-sample-name matches are here: `output/OnlyChosen_germplasmName_to_FullSampleName_matches_NRCRI_2021May03.csv`.
+
+List of DNA-sample-names are here:  
+
+1. RefPanel (containing NRCRI TP):  
+2. New samples (DCAs21-5841): 
+
+# BLUPs
+
+These are the BLUPs combining data for each clone across trials/locations _without_ genomic information, used as input for genomic prediction downstream.
+
+```{r, message=F, rows.print=12}
+library(tidyverse); library(magrittr);
+source(here::here("code","gsFunctions.R"))
+dbdata<-readRDS(here::here("output","NRCRI_ExptDesignsDetected_2021May03.rds"))
+traits<-c("CGM","CGMS1","CGMS2","MCMDS",
+          "DM","DMsg","PLTHT","BRNHT1","HI",
+          "logDYLD","logFYLD","logTOPYLD","logRTNO")
+blups<-readRDS(file=here::here("output","NRCRI_blupsForModelTraining_twostage_asreml_2021May03.rds")) 
+
+blups %>% 
+  left_join(nestDesignsDetectedByTraits(dbdata,traits) %>% 
+  mutate(Nplots=map_dbl(MultiTrialTraitData,nrow)) %>% 
+    select(Trait,Nplots)) %>% 
+  mutate(Nclones=map_dbl(blups,~nrow(.)),
+         NoutliersRemoved=map2_dbl(outliers1,outliers2,~length(.x)+length(.y))) %>% 
+  #relocate(c(Nclones,NoutliersRemoved),.after = Trait) %>% 
+  #select(-blups,-varcomp,-outliers1,-outliers2) %>% 
+  select(Trait,Nplots,Nclones,NoutliersRemoved,Vg,Ve,H2) %>% 
+  mutate(across(is.numeric,~round(.,4))) %>% arrange(desc(H2)) %>% 
+  rmarkdown::paged_table()
+```
+
+```{r}
+blups %>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  ggplot(.,aes(x=drgBLUP,fill=Trait)) + geom_histogram() + facet_wrap(~Trait, scales='free') + 
+  theme_bw() + scale_fill_viridis_d() + 
+  labs(title = "Distribution of de-regressed BLUP Values")
+```
+
+```{r}
+blups %>% 
+  select(Trait,blups) %>% 
+  unnest(blups) %>% 
+  ggplot(.,aes(x=Trait,y=REL,fill=Trait)) + geom_boxplot(notch=T) + #facet_wrap(~Trait, scales='free') + 
+  theme_bw() + scale_fill_viridis_d() + theme(axis.text.x = element_text(angle=90))
+  labs(title = "Distribution of BLUP Reliabilities")
+```
+# Marker density and distribution
+```{r}
+library(tidyverse); library(magrittr);
+snps<-readRDS(file=here::here("output","DosageMatrix_NRCRI_2021May03.rds"))
+mrks<-colnames(snps) %>% 
+  tibble(SNP_ID=.) %>% 
+  separate(SNP_ID,c("Chr","Pos","Allele"),"_") %>% 
+  mutate(Chr=as.integer(gsub("S","",Chr)),
+         Pos=as.numeric(Pos))
+mrks %>% 
+  ggplot(.,aes(x=Pos,fill=as.character(Chr))) + geom_histogram() + 
+  facet_wrap(~Chr,scales = 'free') + theme_bw() + 
+  scale_fill_viridis_d() + theme(legend.position = 'none',axis.text.x = element_text(angle=90))
+```
+```{r, rows.print=18}
+mrks %>% count(Chr) %>% rmarkdown::paged_table()
+```
+
+# Prediction accuracy
+
+3. [Check prediction accuracy](03-CrossValidation.html): Evaluate prediction accuracy with cross-validation.
+
+```{r}
+rm(list=ls());gc()
+library(tidyverse); library(magrittr); 
+cv<-readRDS(here::here("output","cvresults_A_2021May03.rds")) %>% 
+  bind_rows(readRDS(here::here("output","cvresults_ADE_1_2021May03.rds"))) %>% 
+  bind_rows(readRDS(here::here("output","cvresults_ADE_2_2021May03.rds"))) %>% 
+  unnest(CVresults) %>% 
+  select(-splits,-accuracy)
+traits<-c("CGM","CGMS1","CGMS2","MCMDS",
+          "DM","DMsg","PLTHT","BRNHT1","HI",
+          "logDYLD","logFYLD","logTOPYLD","logRTNO")
+cv %<>% 
+  mutate(Trait=factor(Trait,levels=traits),
+         modelType=factor(modelType,levels=c("A","ADE")))
+```
+
+## Table of mean accuracies
+
+5-fold cross-validation, replicated 20 times.
+
+Mean accuracy and upper/lower 95% interval.
+
+Two prediction models: A (additive-only) and ADE (additive + dominance + additive-by-dominance epistasis).
+
+```{r, rows.print=12}
+cv %>% 
+  group_by(Trait,modelType) %>% 
+  # use accGETGV. For modelA we GETGV==GEBV. For modelADE we don't want GEBV, just GETGV.
+  summarize(meanAccuracy=mean(accGETGV,na.rm=T),
+            lower5pct=quantile(accGETGV,probs = c(0.05),na.rm=T),
+            upper5pct=quantile(accGETGV,probs = c(0.95),na.rm=T)) %>% 
+  mutate(across(is.numeric,~round(.,2))) %>% arrange(modelType,desc(meanAccuracy)) %>% 
+  rmarkdown::paged_table()
+```
+
+## Boxplot of accuracies
+
+5-fold cross-validation, replicated 20 times.
+
+Two prediction models: A (additive-only) and ADE (additive + dominance + additive-by-dominance epistasis).
+
+```{r}
+cv %>% 
+  ggplot(.,aes(x=Trait,y=accGETGV,fill=modelType)) + 
+  geom_boxplot(position = "dodge2",color='gray50',size=0.5, notch = T) + 
+  geom_hline(yintercept = 0, color='darkred') + 
+  theme_bw() + 
+  theme(strip.text.x = element_text(face='bold', size=12),
+        axis.text.y = element_text(face='bold', size=14, angle = 0),
+        axis.text.x = element_text(face='bold', size=18, angle = 90, hjust = 1),
+        axis.title.y = element_text(face='bold', size=12),
+        plot.title = element_text(face='bold'),
+        legend.text = element_text(face='bold',size=16),
+        legend.title = element_text(face='bold',size=16),
+        legend.position = 'bottom') + 
+  scale_fill_viridis_d() + 
+  labs(title="Prediction Accuracies", y="GEBV or GETGV accuracy",x=NULL) +
+  geom_hline(yintercept = 0, color='darkred')
+```
+
+1. Accuracy estimates are most improved relative to previously. I didn't run the precise cross-validation folds so the judgement is based on visual comparison to the Dec. 2020 plot. 
+2. DYLD and FYLD are _not_ well predicted and I would not recommend using them based on selection.
+
+# Genetic Gain
+
+```{r, fig.width=8, fig.height=10}
+library(tidyverse)
+library(magrittr)
+gebvs <- read.csv(here::here("output", "GEBV_NRCRI_ModelA_2021May03.csv"), 
+    stringsAsFactors = F) %>% 
+  pivot_longer(cols = any_of(traits),names_to = "Trait",values_to = "GEBV")
+gebvs %<>% 
+  mutate(Trait=factor(Trait,levels=traits),
+         Group=factor(Group,levels=c("nrTP","C1a","C1b","C2a","C2b","C3a","C3b")))
+
+gebvs %>% 
+  group_by(Trait, Group) %>% 
+  summarize(meanGEBV = mean(GEBV), 
+            stdErr = sd(GEBV)/sqrt(n()), 
+            upperSE = meanGEBV + stdErr, 
+            lowerSE = meanGEBV - stdErr) %>% 
+  ggplot(., aes(x = Group, 
+                y = meanGEBV, 
+                fill = Trait)) + 
+  geom_bar(stat = "identity", color = "gray60", 
+           size = 1.25) + 
+  geom_linerange(aes(ymax = upperSE, ymin = lowerSE), color = "gray60", size = 1.25) + 
+  facet_wrap(~Trait, scales = "free") + 
+  theme_bw() + 
+  geom_hline(yintercept = 0, size = 1.15, color = "black") + 
+  theme(axis.text.x = element_text(face = "bold", angle = 90, size = 12), 
+        axis.title.y = element_text(face = "bold", size = 14), 
+        legend.position = "none", 
+        strip.background.x = element_blank(), 
+        strip.text = element_text(face = "bold", size = 14)) + 
+  scale_fill_viridis_d() + 
+  labs(x = NULL, y = "Mean GEBVs")
+```
+
+
+
