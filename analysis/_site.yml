@@ -1,7 +1,7 @@
-name: "NRCRI_2021GS"
+name: NRCRI_2021GS
 output_dir: ../docs
 navbar:
-  title: "NRCRI_2021GS"
+  title: NRCRI_2021GS
   left:
   - text: Home
     href: index.html
@@ -23,13 +23,16 @@ navbar:
       href: 04-GetGBLUPs.html
   - text: Results
     href: 05-Results.html
-
   - text: Other
     menu:
     - text: About
       href: about.html
     - text: License
       href: license.html
+  right:
+  - icon: fa-github
+    text: Source code
+    href: https://github.com/wolfemd/NRCRI_2021GS
 output:
   workflowr::wflow_html:
     toc: yes
