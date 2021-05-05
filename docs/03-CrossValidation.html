@@ -9,9 +9,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Marnin Wolfe" />
 
 
-<title>Impute NRCRI DCas21_5841</title>
+<title>Check prediction accuracy</title>
 
 <script src="site_libs/header-attrs-2.7/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
@@ -33,6 +34,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
@@ -489,8 +492,9 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Impute NRCRI DCas21_5841</h1>
-<h4 class="date">2021-April-29</h4>
+<h1 class="title toc-ignore">Check prediction accuracy</h1>
+<h4 class="author">Marnin Wolfe</h4>
+<h4 class="date">2021-May-03</h4>
 
 </div>
 
@@ -926,7 +930,7 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <div id="versions" class="tab-pane fade">
 
 <p>
-These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/ImputeDCas21_5841.Rmd</code>) and HTML (<code>docs/ImputeDCas21_5841.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/03-CrossValidation.Rmd</code>) and HTML (<code>docs/03-CrossValidation.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -952,36 +956,19 @@ Message
 <tbody>
 <tr>
 <td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/wolfemd/NRCRI_2021GS/e8b3eebcbb3c59166c3122f5960291e79345a1c6/docs/ImputeDCas21_5841.html" target="_blank">e8b3eeb</a>
-</td>
-<td>
-wolfemd
-</td>
-<td>
-2021-05-03
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
 Rmd
 </td>
 <td>
-<a href="https://github.com/wolfemd/NRCRI_2021GS/blob/c8876397f11b6301a3caa17a2a6daeed125ef27b/analysis/ImputeDCas21_5841.Rmd" target="_blank">c887639</a>
+<a href="https://github.com/wolfemd/NRCRI_2021GS/blob/94ec81122c0b7a209fbf75bf47ca3e2101a0f529/analysis/03-CrossValidation.Rmd" target="_blank">94ec811</a>
 </td>
 <td>
 wolfemd
 </td>
 <td>
-2021-05-03
+2021-05-05
 </td>
 <td>
-Publish site up through cleanTPdata step to generate cleaned TP data before continuing pipeline.
+Completed prediction. Build site and push to GitHub / Cassavabase FTP server. Share to NRCRI.
 </td>
 </tr>
 </tbody>
@@ -991,98 +978,218 @@ Publish site up through cleanTPdata step to generate cleaned TP data before cont
 </div>
 </div>
 </div>
-<p>DArTseqLD (DCas21-5841).</p>
-<div id="copy-data" class="section level1">
-<h1>Copy data</h1>
-<p>Copy the imputation reference panel from 2019 to the <code>data/</code> folder.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> /workdir/mw489/</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> -r /home/jj332_cas/marnin/NRCRI_2021GS /workdir/mw489/</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> -r /home/jj332_cas/CassavaGenotypeData/CassavaGeneticMap /workdir/mw489/NRCRI_2021GS/data/</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> /home/jj332_cas/CassavaGenotypeData/nextgenImputation2019/ImputationStageII_71219/chr*_ImputationReferencePanel_StageIIpartI_72219.vcf.gz /workdir/mw489/NRCRI_2021GS/data/</span></code></pre></div>
+<div id="previous-step" class="section level1">
+<h1>Previous step</h1>
+<ol start="2" style="list-style-type: decimal">
+<li><a href="02-GetBLUPs.html">Get BLUPs combining all trial data</a>: Combine data from all trait-trials to get BLUPs for downstream genomic prediction.
+<ul>
+<li>Fit mixed-model to multi-trial dataset and extract BLUPs, de-regressed BLUPs and weights. Include two rounds of outlier removal.</li>
+</ul></li>
+</ol>
 </div>
-<div id="impute-with-west-africa-refpanel" class="section level1">
-<h1>Impute with West Africa RefPanel</h1>
-<p>Impute with <a href="https://faculty.washington.edu/browning/beagle/b5_0.html">Beagle V5.0</a>.</p>
-<p>Use the “imputation reference panel” dataset from 2019, e.g. <code>chr1_ImputationReferencePanel_StageIIpartI_72219.vcf.gz</code> as reference.</p>
-<p>Used 1 large memory Cornell CBSU machine (e.g. <a href="https://biohpc.cornell.edu/lab/hardware.aspx">cbsulm17; 112 cores, 512 GB RAM</a>), running 1 chromosome at a time.</p>
-<p>R functions are stored in the <code>code/</code> sub-directory. Functions sourced from e.g. <strong>imputationFunctions.R</strong> are wrappers around e.g. Beagle, and other command line programs.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /workdir/mw489/NRCRI_2021GS/</span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>targetVCFpath<span class="ot">&lt;-</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data/Report-DCas21-5841/&quot;</span>) <span class="co"># location of the targetVCF</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>refVCFpath<span class="ot">&lt;-</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data/&quot;</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>mapPath<span class="ot">&lt;-</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data/CassavaGeneticMap/&quot;</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>outPath<span class="ot">&lt;-</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/&quot;</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>outSuffix<span class="ot">&lt;-</span><span class="st">&quot;DCas21_5841&quot;</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;code&quot;</span>,<span class="st">&quot;imputationFunctions.R&quot;</span>))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>purrr<span class="sc">::</span><span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>,<span class="sc">~</span><span class="fu">runBeagle5</span>(<span class="at">targetVCF=</span><span class="fu">paste0</span>(targetVCFpath,<span class="st">&quot;chr&quot;</span>,.,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                                             <span class="st">&quot;_DCas21_5841.vcf.gz&quot;</span>),</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">refVCF=</span><span class="fu">paste0</span>(refVCFpath,<span class="st">&quot;chr&quot;</span>,.,<span class="st">&quot;_ImputationReferencePanel_StageIIpartI_72219.vcf.gz&quot;</span>),</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">mapFile=</span><span class="fu">paste0</span>(mapPath,<span class="st">&quot;chr&quot;</span>,.,<span class="st">&quot;_cassava_cM_pred.v6_91019.map&quot;</span>),</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">outName=</span><span class="fu">paste0</span>(outPath,<span class="st">&quot;chr&quot;</span>,.,<span class="st">&quot;_DCas21_5841_WA_REFimputed&quot;</span>),</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                            <span class="at">nthreads=</span><span class="dv">112</span>))</span></code></pre></div>
-<p>Clean up Beagle log files after run. Move to sub-directory <code>output/BeagleLogs/</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /workdir/mw489/NRCRI_2021GS/output/<span class="kw">;</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> BeagleLogs<span class="kw">;</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> *_DCas21_5841_WA_REFimputed.log BeagleLogs/</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> -r BeagleLogs /home/jj332_cas/marnin/NRCRI_2021GS/output/</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> *_DCas21_5841_WA_REFimputed* /home/jj332_cas/marnin/NRCRI_2021GS/output/</span></code></pre></div>
+<div id="cross-validation" class="section level1">
+<h1>Cross-validation</h1>
+<p>5-fold cross-validation. Replicate 5-times.</p>
+<p>2 genomic models:</p>
+<ol style="list-style-type: decimal">
+<li>Additive-only (<strong>A</strong>)</li>
+<li>Addititive plus dominance plus additive-by-dominance epistasis (<strong>ADE</strong>)</li>
+</ol>
 </div>
-<div id="post-impute-filter" class="section level1">
-<h1>Post-impute filter</h1>
-<p>For now, the function will just do a fixed filter: AR2&gt;0.75 (DR2&gt;0.75 as of Beagle5.0), P_HWE&gt;1e-20, MAF&gt;0.005 [0.5%].</p>
-<p>It can easily be modified in the future to include parameters to vary the filter specifications.</p>
-<p>Input parameters</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @inPath path to input VCF-to-be-filtered, can be left null if path included in @inName . Must end in &quot;/&quot;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @inName name of input VCF file EXCLUDING file extension. Assumes .vcf.gz</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @outPath path where filtered VCF and related are to be stored.Can be left null if path included in @outName . Must end in &quot;/&quot;.</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&#39; @outName name desired for output EXCLUDING extension. Output will be .vcf.gz </span></span></code></pre></div>
-<p>Loop to filter all 18 VCF files in parallel</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>inPath<span class="ot">&lt;-</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/&quot;</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>outPath<span class="ot">&lt;-</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/&quot;</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;code&quot;</span>,<span class="st">&quot;imputationFunctions.R&quot;</span>))</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(furrr); <span class="fu">options</span>(<span class="at">mc.cores=</span><span class="dv">18</span>); <span class="fu">plan</span>(multiprocess)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">future_map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>,<span class="sc">~</span><span class="fu">postImputeFilter</span>(<span class="at">inPath=</span>inPath,</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">inName=</span><span class="fu">paste0</span>(<span class="st">&quot;chr&quot;</span>,.,<span class="st">&quot;_DCas21_5841_WA_REFimputed&quot;</span>),</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">outPath=</span>outPath,</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">outName=</span><span class="fu">paste0</span>(<span class="st">&quot;chr&quot;</span>,.,<span class="st">&quot;_DCas21_5841_WA_REFimputedAndFiltered&quot;</span>)))</span></code></pre></div>
-<p>Check what’s left</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>purrr<span class="sc">::</span><span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>,<span class="sc">~</span><span class="fu">system</span>(<span class="fu">paste0</span>(<span class="st">&quot;zcat &quot;</span>,here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/&quot;</span>),<span class="st">&quot;chr&quot;</span>,.,<span class="st">&quot;_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz | wc -l&quot;</span>)))</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 7366</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 3439</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 3129</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 2581</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 3119</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2962</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 1574</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 2809</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 2854</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 2334</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># 2728</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 2434</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 2178</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 4912</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 3356</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 2272</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co"># 2142</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># 2651</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /workdir/mw489/NRCRI_2021GS/output/<span class="kw">;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> -r *_DCas21_5841_WA_REFimputed* /home/jj332_cas/marnin/NRCRI_2021GS/output/</span></code></pre></div>
+<div id="prep.-genomic-data" class="section level1">
+<h1>Prep. genomic data</h1>
+<div id="get-snp-data-from-ftp" class="section level2">
+<h2>Get SNP data from FTP</h2>
+<p>The data for the next step can be found on the cassavabase FTP server <a href="ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/">here</a>.</p>
+<p>Can be loaded directly to R from FTP.</p>
+<p><strong>NOTICE:</strong> You need enough RAM and a stable network connection. I do the next steps, including cross-validation on a server with plenty of RAM and a good, stable network connection, rather than on my personal computer (a laptop with 16 GB RAM).</p>
+<p>The outputs (kinship matrices and filtered snp dosages) of the steps below, which are too large for GitHub, can be found on the cassavabase FTP server <a href="ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/">here</a>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># activate multithread OpenBLAS for fast compute of SigmaM (genotypic var-covar matrix)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/jj332_cas/marnin/NRCRI_2021GS/<span class="kw">;</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OMP_NUM_THREADS=</span>56</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(magrittr); </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># RefPanel (including primary TP and original GS progeny)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Dosage matrix</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>snps_refpanel<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span><span class="fu">url</span>(<span class="fu">paste0</span>(<span class="st">&quot;ftp://ftp.cassavabase.org/marnin_datasets/NGC_BigData/&quot;</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                              <span class="st">&quot;DosageMatrix_RefPanelAndGSprogeny_ReadyForGP_73019.rds&quot;</span>)))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 2020 GS progeny dosages (C3a)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="do">## these don&#39;t have phenotypes yet. including for convenience </span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="do">## and so we don&#39;t get suprised by their absence in the next iteration</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>snps5510<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span><span class="fu">url</span>(<span class="fu">paste0</span>(<span class="st">&quot;ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2020GS/output/&quot;</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">&quot;DosageMatrix_DCas20_5510_WA_REFimputedAndFiltered.rds&quot;</span>)))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>snps5440<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span><span class="fu">url</span>(<span class="fu">paste0</span>(<span class="st">&quot;ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2020GS/output/&quot;</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">&quot;DosageMatrix_DCas20_5440_WA_REFimputedAndFiltered.rds&quot;</span>)))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="do">## DCas21-5841 Dosage matrix (C3b)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>snps5841<span class="ot">&lt;-</span><span class="fu">readRDS</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;DosageMatrix_DCas21_5841_WA_REFimputedAndFiltered.rds&quot;</span>))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>snps2keep<span class="ot">&lt;-</span><span class="fu">colnames</span>(snps_refpanel) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  .[. <span class="sc">%in%</span> <span class="fu">colnames</span>(snps5841)] <span class="sc">%&gt;%</span> </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  .[. <span class="sc">%in%</span> <span class="fu">colnames</span>(snps5510)] <span class="sc">%&gt;%</span> </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  .[. <span class="sc">%in%</span> <span class="fu">colnames</span>(snps5440)]</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>snps<span class="ot">&lt;-</span><span class="fu">rbind</span>(snps_refpanel[,snps2keep],</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>            snps5510[,snps2keep]) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(.,snps5440[,snps2keep]) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(.,snps5841[,snps2keep])</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(snps) <span class="co"># [1] 22936 20559</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">#rm(list=(ls() %&gt;% grep(&quot;snps&quot;,.,value = T, invert = T)))</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>blups<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;NRCRI_blupsForModelTraining_twostage_asreml_2021May03.rds&quot;</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>blups <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Trait,blups) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(blups) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="st">`</span><span class="at">std error</span><span class="st">`</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(GID <span class="sc">%in%</span> <span class="fu">rownames</span>(snps))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">unique</span>(blups<span class="sc">$</span>GID) <span class="sc">%in%</span> <span class="fu">rownames</span>(snps)) </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># TRUE</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 3114</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>samples2Keep<span class="ot">&lt;-</span><span class="fu">unique</span>(blups<span class="sc">$</span>GID) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">union</span>(.,<span class="fu">grep</span>(<span class="st">&quot;c2|c3&quot;</span>,<span class="fu">rownames</span>(snps),<span class="at">value =</span> T, <span class="at">ignore.case =</span> T)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">union</span>(.,<span class="fu">rownames</span>(snps5510)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">union</span>(.,<span class="fu">rownames</span>(snps5440)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">union</span>(.,<span class="fu">rownames</span>(snps5841))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(samples2Keep) <span class="co"># [1] 7286 </span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>snps<span class="ot">&lt;-</span>snps[samples2Keep,]; </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span></code></pre></div>
 </div>
-<div id="formats-for-downstream-analysis" class="section level1">
-<h1>Formats for downstream analysis</h1>
-<p>The function below will (1) convert the input VCF to plink1.9 binary format and (2) convert the plink binary to a dosage (0,1,2) matrix with special attention to which allele gets counted in the file.</p>
-<p><strong>NOTICE:</strong> I was worried about <code>plink1.9</code> changing allele codes between files. There is some risk the counted allele could switch between e.g. the reference panel and the progeny files because of allele freq. (see plink documentation). To avoid this, went to extra trouble: write a file suffixed <code>*.alleleToCount</code> listing SNP ID (column 1) and the ALT allele from the VCF (column 2). Pass the file to <code>plink1.9</code> using the <code>--recode-allele</code> flag to ensure all output dosages count the ALT allele consistent with the VCFs. The reason to use <code>plink1.9</code> is that <code>Beagle5</code> imputed files don’t have a <strong>DS</strong> (dosage) field that can be directly extracted. Instead, phased genotypes e.g. <code>0|1</code> need to be converted to dosages (e.g. <code>0|1 --&gt; 1</code>, <code>1|1 --&gt; 2</code>). An alternative might be to extract the haplotypes using <code>vcftools</code> and manually (in R) computed the dosages; that would give most control but is slow.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/jj332_cas/marnin/NRCRI_2021GS/<span class="kw">;</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(magrittr);</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;code&quot;</span>,<span class="st">&quot;imputationFunctions.R&quot;</span>))</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(furrr); <span class="fu">options</span>(<span class="at">mc.cores=</span><span class="dv">18</span>); <span class="fu">plan</span>(multiprocess)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>pathOut<span class="ot">&lt;-</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/&quot;</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># DCas21_5841</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="fu">future_map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>,<span class="sc">~</span><span class="fu">convertVCFtoDosage</span>(<span class="at">pathIn=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/&quot;</span>),<span class="at">pathOut=</span>pathOut,</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">vcfName =</span> <span class="fu">paste0</span>(<span class="st">&quot;chr&quot;</span>,.,<span class="st">&quot;_DCas21_5841_WA_REFimputedAndFiltered&quot;</span>)))</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Genome-wide dosage (for use in R) for each dataset</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># DCas21_5841</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">createGenomewideDosage</span>(<span class="at">pathIn =</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output/&quot;</span>), <span class="at">chroms=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>, <span class="st">&quot;_DCas21_5841_WA_REFimputedAndFiltered&quot;</span>)</span></code></pre></div>
+<div id="maf1-filter" class="section level2">
+<h2>MAF&gt;1% filter</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;code&quot;</span>,<span class="st">&quot;gsFunctions.R&quot;</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>snps <span class="sc">%&lt;&gt;%</span> <span class="fu">maf_filter</span>(.,<span class="fl">0.01</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(snps) <span class="co"># [1]  7286 20550</span></span></code></pre></div>
+</div>
+<div id="make-add-dom-and-epi-kinships" class="section level2">
+<h2>Make Add, Dom and Epi kinships</h2>
+<p>Going to use my own kinship function.</p>
+<p>Make the kinships.</p>
+<p>Below e.g. <code>A*A</code> makes a matrix that approximates additive-by-additive epistasis relationships.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>A<span class="ot">&lt;-</span><span class="fu">kinship</span>(snps,<span class="at">type=</span><span class="st">&quot;add&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>D<span class="ot">&lt;-</span><span class="fu">kinship</span>(snps,<span class="at">type=</span><span class="st">&quot;dom&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>AD<span class="ot">&lt;-</span>A<span class="sc">*</span>D</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(snps,<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;DosageMatrix_NRCRI_2021May03.rds&quot;</span>))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(A,<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;Kinship_A_NRCRI_2021May03.rds&quot;</span>))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(D,<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;Kinship_D_NRCRI_2021May03.rds&quot;</span>))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(AD,<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;Kinship_AD_NRCRI_2021May03.rds&quot;</span>))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#rm(snps); gc()</span></span></code></pre></div>
+<p><strong>NOTICE:</strong> The outputs (kinship matrices and filtered snp dosages) of the steps below, which are too large for GitHub, can be found on the cassavabase FTP server <a href="ftp://ftp.cassavabase.org/marnin_datasets/NRCRI_2021GS/">here</a>.</p>
+</div>
+</div>
+<div id="cross-validation-1" class="section level1">
+<h1>Cross-validation</h1>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/jj332_cas/marnin/NRCRI_2021GS/<span class="kw">;</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OMP_NUM_THREADS=</span>56 # <span class="va">activate</span> <span class="va">multithread</span> <span class="va">OpenBLAS</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">##### [considered] </span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">######/programs/R-4.0.0/bin/R # switched to R V4, having trouble with sommer/Matrix in v3.5</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">## may have to reinstall packages</span></span></code></pre></div>
+<div id="set-up-training-testing-data" class="section level2">
+<h2>Set-up training-testing data</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list=</span><span class="fu">ls</span>())</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse); <span class="fu">library</span>(magrittr); </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;code&quot;</span>,<span class="st">&quot;gsFunctions.R&quot;</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>blups<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;NRCRI_blupsForModelTraining_twostage_asreml_2021May03.rds&quot;</span>))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>A<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;Kinship_A_NRCRI_2021May03.rds&quot;</span>))</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>blups <span class="sc">%&lt;&gt;%</span> </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Trait,blups) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(blups) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="st">`</span><span class="at">std error</span><span class="st">`</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(GID <span class="sc">%in%</span> <span class="fu">rownames</span>(A))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>cv2do<span class="ot">&lt;-</span>blups <span class="sc">%&gt;%</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">TrainTestData=</span><span class="sc">-</span>Trait)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>cv2do <span class="sc">%&gt;%</span> rmarkdown<span class="sc">::</span><span class="fu">paged_table</span>()</span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["Trait"],"name":[1],"type":["chr"],"align":["left"]},{"label":["TrainTestData"],"name":[2],"type":["list"],"align":["right"]}],"data":[{"1":"CGMS1","2":"<tibble[,6]>"},{"1":"CGMS2","2":"<tibble[,6]>"},{"1":"MCMDS","2":"<tibble[,6]>"},{"1":"DMsg","2":"<tibble[,6]>"},{"1":"PLTHT","2":"<tibble[,6]>"},{"1":"BRNHT1","2":"<tibble[,6]>"},{"1":"HI","2":"<tibble[,6]>"},{"1":"logFYLD","2":"<tibble[,6]>"},{"1":"logTOPYLD","2":"<tibble[,6]>"},{"1":"logRTNO","2":"<tibble[,6]>"},{"1":"DM","2":"<tibble[,6]>"},{"1":"logDYLD","2":"<tibble[,6]>"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # A tibble: 12 x 2</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#    Trait     TrainTestData     </span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#    &lt;chr&gt;     &lt;list&gt;            </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#  1 CGMS1     &lt;tibble [2,986 × 6]&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#  2 CGMS2     &lt;tibble [2,144 × 6]&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#  3 MCMDS     &lt;tibble [2,987 × 6]&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#  4 DMsg      &lt;tibble [791 × 6]&gt;  </span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#  5 PLTHT     &lt;tibble [2,505 × 6]&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#  6 BRNHT1    &lt;tibble [1,860 × 6]&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#  7 HI        &lt;tibble [2,711 × 6]&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#  8 logFYLD   &lt;tibble [2,688 × 6]&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#  9 logTOPYLD &lt;tibble [2,702 × 6]&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 10 logRTNO   &lt;tibble [2,693 × 6]&gt;</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 11 DM        &lt;tibble [2,130 × 6]&gt;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 12 logDYLD   &lt;tibble [2,064 × 6]&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cv2do<span class="sc">$</span>TrainTestData[[<span class="dv">6</span>]] <span class="sc">%&gt;%</span> head <span class="sc">%&gt;%</span> rmarkdown<span class="sc">::</span><span class="fu">paged_table</span>()</span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["GID"],"name":[1],"type":["chr"],"align":["left"]},{"label":["BLUP"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["PEV"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["REL"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["drgBLUP"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["WT"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"AR124:250107818","2":"8.647876","3":"46.46010","4":"0.4054099","5":"21.331190","6":"7.276556"},{"1":"AR1410:250399710","2":"4.063514","3":"44.17898","4":"0.4346033","5":"9.349938","6":"8.137156"},{"1":"AR144:250107805","2":"-5.134758","3":"44.26454","4":"0.4335084","5":"-11.844655","6":"8.103540"},{"1":"AR155:250134515","2":"-6.878125","3":"54.83950","4":"0.2981715","5":"-23.067685","6":"4.645796"},{"1":"AR182:250134520","2":"-2.311664","3":"62.32273","4":"0.2024021","5":"-11.421147","6":"2.821257"},{"1":"AR311:250134529","2":"4.939141","3":"58.27090","4":"0.2542569","5":"19.425787","6":"3.758532"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#                         GID       BLUP       PEV       REL    drgBLUP       WT</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1  AR124:250107818  8.647876 46.46010 0.4054099  21.331190 7.276556</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2 AR1410:250399710  4.063514 44.17898 0.4346033   9.349938 8.137156</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 3  AR144:250107805 -5.134758 44.26454 0.4335084 -11.844655 8.103540</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 4  AR155:250134515 -6.878125 54.83950 0.2981715 -23.067685 4.645796</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 5  AR182:250134520 -2.311664 62.32273 0.2024021 -11.421147 2.821257</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 6  AR311:250134529  4.939141 58.27090 0.2542569  19.425787 3.758532</span></span></code></pre></div>
+<p>The function below <code>runCrossVal()</code> function implements nfold cross-validation. Specifically, for each of <strong>nrepeats</strong> it splits the data into <strong>nfolds</strong> sets according to <strong>gid</strong>. So if <code>nfolds=5</code> then the the clones will be divided into 5 groups and 5 predictions will be made. In each prediction, 4/5 of the clones will be used to predict the remaining 1/5. Accuracy of the model is measured as the correlation between the BLUPs (adj. mean for each CLONE) in the <em>test set</em> and the GEBV (the prediction made of each clone when it was in the test set).</p>
+<p>Below, 20 reps x 5-fold cross-validation are run on 1 large memory Cornell CBSU machine each (e.g. <a href="https://biohpc.cornell.edu/lab/hardware.aspx">cbsulm29; 104 cores, 512 GB RAM</a>).</p>
+</div>
+<div id="cv---modeltypea" class="section level2">
+<h2>CV - modelType=“A”</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>starttime<span class="ot">&lt;-</span><span class="fu">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>cv_A<span class="ot">&lt;-</span>cv2do <span class="sc">%&gt;%</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">CVresults=</span><span class="fu">map</span>(TrainTestData,<span class="sc">~</span><span class="fu">runCrossVal</span>(<span class="at">TrainTestData=</span>.,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">modelType=</span><span class="st">&quot;A&quot;</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">grms=</span><span class="fu">list</span>(<span class="at">A=</span>A),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">byGroup=</span><span class="cn">FALSE</span>,<span class="at">augmentTP=</span><span class="cn">NULL</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">nrepeats=</span><span class="dv">20</span>,<span class="at">nfolds=</span><span class="dv">5</span>,<span class="at">ncores=</span><span class="dv">25</span>,<span class="at">gid=</span><span class="st">&quot;GID&quot;</span>)))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>runtime<span class="ot">&lt;-</span><span class="fu">proc.time</span>()[<span class="dv">3</span>]<span class="sc">-</span>starttime; runtime</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>cv_A <span class="sc">%&lt;&gt;%</span> <span class="fu">mutate</span>(<span class="at">modelType=</span><span class="st">&quot;A&quot;</span>) <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>TrainTestData)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(cv_A,<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;cvresults_A_2021May03.rds&quot;</span>))</span></code></pre></div>
+</div>
+<div id="cv---modeltypeade" class="section level2">
+<h2>CV - modelType=“ADE”</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># split it to two tranches of 10 reps</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">future.globals.maxSize=</span> <span class="dv">3000</span><span class="sc">*</span><span class="dv">1024</span><span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>D<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;Kinship_D_NRCRI_2021May03.rds&quot;</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>AD<span class="ot">&lt;-</span><span class="fu">readRDS</span>(<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;Kinship_AD_NRCRI_2021May03.rds&quot;</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>starttime<span class="ot">&lt;-</span><span class="fu">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>cv_ADE_1<span class="ot">&lt;-</span>cv2do <span class="sc">%&gt;%</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">CVresults=</span><span class="fu">map</span>(TrainTestData,<span class="sc">~</span><span class="fu">runCrossVal</span>(<span class="at">TrainTestData=</span>.,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">modelType=</span><span class="st">&quot;ADE&quot;</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">grms=</span><span class="fu">list</span>(<span class="at">A=</span>A,<span class="at">D=</span>D,<span class="at">AD=</span>AD),</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">byGroup=</span><span class="cn">FALSE</span>,<span class="at">augmentTP=</span><span class="cn">NULL</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">nrepeats=</span><span class="dv">10</span>,<span class="at">nfolds=</span><span class="dv">5</span>,<span class="at">ncores=</span><span class="dv">5</span>,<span class="at">gid=</span><span class="st">&quot;GID&quot;</span>)))</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>cv_ADE_1 <span class="sc">%&lt;&gt;%</span> <span class="fu">mutate</span>(<span class="at">modelType=</span><span class="st">&quot;ADE&quot;</span>) <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>TrainTestData)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(cv_ADE_1,<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;cvresults_ADE_1_2021May03.rds&quot;</span>))</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>runtime<span class="ot">&lt;-</span><span class="fu">proc.time</span>()[<span class="dv">3</span>]<span class="sc">-</span>starttime; runtime</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>starttime<span class="ot">&lt;-</span><span class="fu">proc.time</span>()[<span class="dv">3</span>]</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>cv_ADE_2<span class="ot">&lt;-</span>cv2do <span class="sc">%&gt;%</span> </span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">CVresults=</span><span class="fu">map</span>(TrainTestData,<span class="sc">~</span><span class="fu">runCrossVal</span>(<span class="at">TrainTestData=</span>.,</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">modelType=</span><span class="st">&quot;ADE&quot;</span>,</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">grms=</span><span class="fu">list</span>(<span class="at">A=</span>A,<span class="at">D=</span>D,<span class="at">AD=</span>AD),</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">byGroup=</span><span class="cn">FALSE</span>,<span class="at">augmentTP=</span><span class="cn">NULL</span>,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">nrepeats=</span><span class="dv">10</span>,<span class="at">nfolds=</span><span class="dv">5</span>,<span class="at">ncores=</span><span class="dv">5</span>,<span class="at">gid=</span><span class="st">&quot;GID&quot;</span>)))</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>cv_ADE_2 <span class="sc">%&lt;&gt;%</span> <span class="fu">mutate</span>(<span class="at">modelType=</span><span class="st">&quot;ADE&quot;</span>) <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>TrainTestData)</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(cv_ADE_2,<span class="at">file=</span>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;output&quot;</span>,<span class="st">&quot;cvresults_ADE_2_2021May03.rds&quot;</span>))</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>runtime<span class="ot">&lt;-</span><span class="fu">proc.time</span>()[<span class="dv">3</span>]<span class="sc">-</span>starttime; runtime</span></code></pre></div>
+</div>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<p>See <a href="05-Results.html">Results</a>: Home for plots and summary tables.</p>
+</div>
+<div id="next-step" class="section level1">
+<h1>Next step</h1>
+<ol start="4" style="list-style-type: decimal">
+<li><a href="04-GetGBLUPs.html">Genomic prediction</a>: Predict <em>genomic</em> BLUPs (GEBV and GETGV) for all selection candidates using all available data.</li>
+</ol>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1090,7 +1197,42 @@ Publish site up through cleanTPdata step to generate cleaned TP data before cont
 </button>
 </p>
 <div id="workflowr-sessioninfo" class="collapse">
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<pre><code>R version 4.0.3 (2020-10-10)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] magrittr_2.0.1  forcats_0.5.1   stringr_1.4.0   dplyr_1.0.5    
+ [5] purrr_0.3.4     readr_1.4.0     tidyr_1.1.3     tibble_3.1.1   
+ [9] ggplot2_3.3.3   tidyverse_1.3.1 workflowr_1.6.2
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.1.0  xfun_0.22         bslib_0.2.4       haven_2.4.0      
+ [5] colorspace_2.0-0  vctrs_0.3.7       generics_0.1.0    htmltools_0.5.1.1
+ [9] yaml_2.2.1        utf8_1.2.1        rlang_0.4.10      jquerylib_0.1.3  
+[13] later_1.1.0.1     pillar_1.6.0      withr_2.4.2       glue_1.4.2       
+[17] DBI_1.1.1         dbplyr_2.1.1      readxl_1.3.1      modelr_0.1.8     
+[21] lifecycle_1.0.0   cellranger_1.1.0  munsell_0.5.0     gtable_0.3.0     
+[25] rvest_1.0.0       evaluate_0.14     knitr_1.32        httpuv_1.5.5     
+[29] fansi_0.4.2       broom_0.7.6       Rcpp_1.0.6        promises_1.2.0.1 
+[33] backports_1.2.1   scales_1.1.1      jsonlite_1.7.2    fs_1.5.0         
+[37] hms_1.0.0         digest_0.6.27     stringi_1.5.3     rprojroot_2.0.2  
+[41] grid_4.0.3        here_1.0.1        cli_2.4.0         tools_4.0.3      
+[45] sass_0.3.1        crayon_1.4.1      whisker_0.4       pkgconfig_2.0.3  
+[49] ellipsis_0.3.1    xml2_1.3.2        reprex_2.0.0      lubridate_1.7.10 
+[53] rstudioapi_0.13   assertthat_0.2.1  rmarkdown_2.7     httr_1.4.2       
+[57] R6_2.5.0          git2r_0.28.0      compiler_4.0.3   </code></pre>
 </div>
 </div>
 

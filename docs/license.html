@@ -30,6 +30,8 @@
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -298,7 +300,13 @@ $(document).ready(function () {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/wolfemd/NRCRI_2021GS">
+    <span class="fas fa-github"></span>
+     
+    Source code
+  </a>
+</li>
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -333,7 +341,7 @@ $(document).ready(function () {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-05-03
+<strong>Last updated:</strong> 2021-05-05
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -364,16 +372,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongc887639"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> c887639 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomwolfemdNRCRI2021GStree94ec81122c0b7a209fbf75bf47ca3e2101a0f529targetblank94ec811a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/wolfemd/NRCRI_2021GS/tree/94ec81122c0b7a209fbf75bf47ca3e2101a0f529" target="_blank">94ec811</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongc887639" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomwolfemdNRCRI2021GStree94ec81122c0b7a209fbf75bf47ca3e2101a0f529targetblank94ec811a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version c887639. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/wolfemd/NRCRI_2021GS/tree/94ec81122c0b7a209fbf75bf47ca3e2101a0f529" target="_blank">94ec811</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -386,10 +394,6 @@ Ignored files:
     Ignored:    data/.DS_Store
 
 Untracked files:
-    Untracked:  analysis/02-GetBLUPs.Rmd
-    Untracked:  analysis/03-CrossValidation.Rmd
-    Untracked:  analysis/04-GetGBLUPs.Rmd
-    Untracked:  analysis/05-Results.Rmd
     Untracked:  code/convertDart2vcf.R
     Untracked:  code/gsFunctions.R
     Untracked:  code/imputationFunctions.R
@@ -399,10 +403,277 @@ Untracked files:
     Untracked:  data/NRCRI_GBStoPhenoMaster_40318.csv
     Untracked:  data/Report-DCas21-5841/
     Untracked:  data/chr1_RefPanelAndGSprogeny_ReadyForGP_72719.fam
-    Untracked:  output/NRCRI_CleanedTrialData_2021May02.rds
+    Untracked:  output/BeagleLogs/
+    Untracked:  output/DosageMatrix_DCas21_5841_WA_REFimputedAndFiltered.rds
+    Untracked:  output/DosageMatrix_NRCRI_2021May03.rds
+    Untracked:  output/GEBV_NRCRI_ModelA_2021May03.csv
+    Untracked:  output/GETGV_NRCRI_ModelADE_2021May03.csv
+    Untracked:  output/Kinship_AD_NRCRI_2021May03.rds
+    Untracked:  output/Kinship_A_NRCRI_2021May03.rds
+    Untracked:  output/Kinship_D_NRCRI_2021May03.rds
     Untracked:  output/NRCRI_CleanedTrialData_2021May03.rds
     Untracked:  output/NRCRI_ExptDesignsDetected_2021May03.rds
+    Untracked:  output/NRCRI_blupsForModelTraining_twostage_asreml_2021May03.rds
     Untracked:  output/NRCRI_trials_NOT_identifiable.csv
+    Untracked:  output/OnlyChosen_germplasmName_to_FullSampleName_matches_NRCRI_2021May03.csv
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr10_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr11_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr12_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr13_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr14_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr15_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr16_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr17_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr18_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr1_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr2_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr3_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr4_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr5_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr6_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr7_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr8_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputed.INFO
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputed.hwe
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputed.log
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputed.sitesPassing
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputed.vcf.gz
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputedAndFiltered.alleleToCount
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputedAndFiltered.bed
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputedAndFiltered.bim
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputedAndFiltered.fam
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputedAndFiltered.log
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputedAndFiltered.nosex
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputedAndFiltered.raw
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputedAndFiltered.sitesWithAlleles
+    Untracked:  output/chr9_DCas21_5841_WA_REFimputedAndFiltered.vcf.gz
+    Untracked:  output/cvresults_ADE_1_2021May03.rds
+    Untracked:  output/cvresults_ADE_2_2021May03.rds
+    Untracked:  output/cvresults_A_2021May03.rds
+    Untracked:  output/genomicPredictions_ModelADE_twostage_NRCRI_2021May03.rds
+    Untracked:  output/genomicPredictions_ModelA_twostage_NRCRI_2021May03.rds
+    Untracked:  output/genomicPredictions_NRCRI_2021May03.csv
     Untracked:  output/maxNOHAV_byStudy.csv
 
 Unstaged changes:
@@ -447,10 +718,27 @@ Message
 <tbody>
 <tr>
 <td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/wolfemd/NRCRI_2021GS/e8b3eebcbb3c59166c3122f5960291e79345a1c6/docs/license.html" target="_blank">e8b3eeb</a>
+</td>
+<td>
+wolfemd
+</td>
+<td>
+2021-05-03
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
 Rmd
 </td>
 <td>
-4627607
+<a href="https://github.com/wolfemd/NRCRI_2021GS/blob/46276078dc4ea3360132384828c4f0ee6f1b04e3/analysis/license.Rmd" target="_blank">4627607</a>
 </td>
 <td>
 wolfemd
